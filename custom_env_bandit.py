@@ -1,51 +1,35 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-action_values = np.random.normal(0, 1, (10, 1))
+
+def step(action_values, arm):
+    return np.random.normal(action_values[arm], 1, (1, 1))[0]
 
 
-class Env(object):
-    rewards = []
-
-    def __init__(self, values):
-
-        self.values = values
-
-        for v in self.values:
-            self.rewards.append(np.random.normal(v, 1, (1, 1))[0])
-
-    def step(self, arm):
-        return self.rewards[arm]
+def epsilon_greedy_policy(action_values, e):
+    return np.random.choice(10) if np.random.randn(1) < e else np.argmax(action_values)
 
 
-def epsilon_greedy_policy(e):
-    return np.random.choice(10) if abs(np.random.randn()) < e else np.argmax(action_values)
-
-
-alpha = 0.85
-gamma = 0.90
-num_episode = 20000
-s = 0
-
-
-env = Env(action_values)
+num_episode = 1000
 
 
 def n_arm_bandit(e):
     avg_rewards = []
-    total_rewards = 0
+    action_values = np.random.normal(0, 1, (10, 1))
+    g_rewards = 0
     for i in range(1, num_episode + 1):
-
-        action = epsilon_greedy_policy(e)
-        reward = env.step(action)
-        action_values[action] += (1 / i) * (reward - action_values[action])
-        total_rewards += reward
-        avg_rewards.append(total_rewards / i)
+        total_rewards = 0
+        for j in range(1000):
+            action = epsilon_greedy_policy(action_values, e)
+            reward = step(action_values, action)
+            action_values[action] += (1 / i) * (reward - action_values[action])
+            total_rewards += reward
+        g_rewards += total_rewards
+        avg_rewards.append(total_rewards)
         # print("action: ", action, "reward: ", reward)
 
-    print(total_rewards)
-
-    return total_rewards, avg_rewards
+    print(g_rewards)
+    return g_rewards, avg_rewards
 
 
 reward_1, avg_reward_1 = n_arm_bandit(0)
@@ -59,4 +43,3 @@ plt.plot(range(0, num_episode), avg_reward_2, c='g')
 plt.plot(range(0, num_episode), avg_reward_3, c='b')
 
 plt.show()
-
