@@ -3,8 +3,6 @@ import numpy as np
 
 
 class Environment:
-    num_episode = 5
-    num_play = 10
     grid_rows = 4
     grid_cols = 12
     grid = np.zeros((grid_rows, grid_cols))
@@ -48,8 +46,11 @@ print(rewards, states)
 
 
 def sarsa_policy(e):
-    print("no hi")
     return 0 if abs(np.random.randn()) <= e else 1
+
+
+num_episode = 5
+num_play = 10
 
 
 def cliff_walking_sarsa(e):
