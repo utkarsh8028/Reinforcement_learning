@@ -7,14 +7,14 @@ class Environment:
     grid_rows = 4
     grid_cols = 12
     grid = np.zeros((grid_rows, grid_cols))
-    start = (0, 0)
-    finish = (0, 12)
+    start = (3, 0)
+    finish = (3, 11)
     current_position = start
     all_actions = ["up", "down", "left", "right"]
 
     def environment_returns(self, action, current_position):
         self.current_position = current_position
-        reward = -100 if self.current_position[0] == 0 and self.current_position[1] in range(1, 12) else -1
+        reward = -100 if self.current_position[0] == 3 and self.current_position[1] in range(1, 11) else -1
         # print('grid', self.grid)
         state = self.action_taken(action)
         return reward, state
@@ -38,7 +38,7 @@ def sarsa_policy(e):
     return 0 if abs(np.random.randn()) <= e else 1
 
 
-num_episode = 5
+num_episode = 100
 num_play = 100
 alpha = 0.1
 gamma = 1
@@ -79,6 +79,9 @@ def cliff_walking(e, method):
             q_value = update_sarsa_q_value(q_value, reward, current_position, next_position)
             print(q_value)
             current_position = next_position
+
+            #if reward==-100:
+    #q_value[3][0] = 10
     return 0
 
 
