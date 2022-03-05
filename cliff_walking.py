@@ -43,8 +43,19 @@ num_play = 10
 alpha = 0.1
 gamma = 1
 
+
 def max_action():
     return "up"
+
+
+def update_sarsa_q_value(q_value, reward, current_pos, next_pos):
+    i = next_pos[0]
+    j = next_pos[1]
+    x = current_pos[0]
+    y = current_pos[1]
+    q_value[i][j] = q_value[i][j] + alpha*(reward+gamma*(q_value[x][y])-q_value[x][y])
+    print("sarsa q", q_value[i][j])
+    return q_value
 
 
 def cliff_walking(e, method):
@@ -53,17 +64,20 @@ def cliff_walking(e, method):
     print(env.grid)
     for i in range(num_episode):
         current_position = env.start
-        q_value = {}
+        q_value = np.zeros(env.grid.shape)
         for j in range(num_play):
             policy = 1 if method == "Q-Learning" else sarsa_policy(e)
             action = random.choice(env.all_actions) if policy == 0 else max_action()
-            reward, position = env.environment_returns(action, current_position)
-            print("reward", policy, reward, position)
-            current_position = position
+            reward, next_position = env.environment_returns(action, current_position)
+            print("reward", policy, reward, next_position)
+            q_value = update_sarsa_q_value(q_value, reward, current_position, next_position)
+            print(q_value)
+            current_position = next_position
     return 0
 
+
 def qvaluewithoutepsilon(reward):
-    current_position = (1,1)
+    current_position = (1, 1)
     q_values = np.zeros((4, 12))
     q_values[current_position] = q_values[current_position] + alpha[reward]
     print(q_values)
