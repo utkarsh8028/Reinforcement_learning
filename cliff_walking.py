@@ -3,6 +3,12 @@ import random
 import numpy as np
 
 
+num_episode = 5
+num_play = 10
+alpha = 0.1
+gamma = 1
+
+
 class Environment:
     grid_rows = 4
     grid_cols = 12
@@ -38,19 +44,13 @@ def sarsa_policy(e):
     return 0 if abs(np.random.randn()) <= e else 1
 
 
-num_episode = 100
-num_play = 100
-alpha = 0.1
-gamma = 1
-
-
 def max_action(position, q_values):
 
-    next_positions = filter_actions(position)
+    next_positions = filter_positions(position)
     if len(next_positions) == 0 :
         print('s')
     action = max(next_positions, key=lambda item: q_values[item[1], item[2]])
-    #action = max(next_positions, key=lambda k: next_positions[k])
+    # action = max(next_positions, key=lambda k: next_positions[k])
     print("ac", action)
     return action[0]
 
@@ -64,14 +64,16 @@ def update_sarsa_q_value(q_value, reward, current_pos, next_pos):
     print("q", q_value[i][j])
     return q_value
 
-def filter_actions(position):
+
+def filter_positions(position):
     next_positions = [("up", position[0] - 1, position[1]), ("down", position[0] + 1, position[1]),
                       ("left", position[0], position[1] - 1), ("right", position[0], position[1] + 1)]
-    return list(filter(lambda x: -1 < x[1] < 4 and -1 < x[2] < 12, next_positions))
+    return list(filter(lambda x: -1 < x[1] < 4 and -1 < x[2] < 12 and (x[1] != 0 and x[2] != 0), next_positions))
+
 
 def random_action(position):
 
-    next_positions = filter_actions(position)
+    next_positions = filter_positions(position)
 
     return random.choice(next_positions)[0]
 
@@ -82,6 +84,7 @@ def cliff_walking(e, method):
     print(env.grid)
     q_value = np.zeros(env.grid.shape)
     for i in range(num_episode):
+        print("episode: ",i)
         current_position = env.start
         count =0
         while current_position != env.finish:
@@ -89,12 +92,13 @@ def cliff_walking(e, method):
             action = random_action(current_position) if policy == 0 else max_action(current_position, q_value)
             reward, next_position = env.environment_returns(action, current_position)
             print("reward", policy, reward, next_position)
-            if next_position!= (0,0):
-                print('')
             q_value = update_sarsa_q_value(q_value, reward, current_position, next_position)
             print(q_value)
             current_position = next_position
             count+=1
+            if reward == -100:
+                print("restarting")
+                break
     print("finished", method)
     return 0
 
