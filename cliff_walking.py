@@ -43,7 +43,6 @@ num_play = 10
 alpha = 0.1
 gamma = 1
 
-
 def max_action():
     return "up"
 
@@ -76,10 +75,16 @@ def cliff_walking(e, method):
     return 0
 
 
-def qvaluewithoutepsilon(reward):
-    current_position = (1, 1)
-    q_values = np.zeros((4, 12))
-    q_values[current_position] = q_values[current_position] + alpha[reward]
-    print(q_values)
+q_values = np.zeros((4, 12))
+
+
+def q_value_without_epsilon(current_position):
+    max_q_value=max((q_values[current_position[0]+1,current_position[1]]),
+                    (q_values[current_position[0]-1,current_position[1]]),
+                    (q_values[current_position[0],current_position[1]+1]),
+                    (q_values[current_position[0],current_position[1]-1]))
+    q_values[current_position] = q_values[current_position] + alpha[reward+ (gamma * max_q_value) - q_values[current_position]]
+
+q_value_without_epsilon((1,1))
 cliff_walking(0.5, "sarsa")
 cliff_walking(0.5, "Q-Learning")
