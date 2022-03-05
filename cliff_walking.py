@@ -10,11 +10,11 @@ def environment(current_position, action):
     grid_cols = 12
     start = (0, 0)
     finish = (0, 12)
-    grid = np.zeros((4, 12))
+    grid = np.zeros((grid_rows, grid_cols))
     all_actions = {"up": (current_position[0] - 1, current_position[1]),
                   "down": (current_position[0] + 1, current_position[1]),
                   "left": (current_position[0], current_position[1] - 1),
-                  "right": (current_position[0] + 1, current_position[1] + 1)}
+                  "right": (current_position[0], current_position[1] + 1)}
 
     reward = -100 if current_position[0] == 0 and current_position[1] in range(1, 11) else -1
 
