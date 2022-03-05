@@ -92,13 +92,14 @@ def cliff_walking(e, method):
             action = random_action(current_position) if policy == 0 else max_action(current_position, q_value)
             reward, next_position = env.environment_returns(action, current_position)
             print("reward", policy, reward, next_position)
+            if reward == -100:
+                print("restarting")
+                break
             q_value = update_sarsa_q_value(q_value, reward, current_position, next_position)
             print(q_value)
             current_position = next_position
             count += 1
-            if reward == -100:
-                print("restarting")
-                break
+
     print("finished", method)
     return 0
 
