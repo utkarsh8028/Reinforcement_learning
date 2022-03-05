@@ -43,6 +43,7 @@ num_play = 10
 alpha = 0.1
 gamma = 1
 
+
 def max_action():
     return "up"
 
@@ -52,7 +53,7 @@ def update_sarsa_q_value(q_value, reward, current_pos, next_pos):
     j = next_pos[1]
     x = current_pos[0]
     y = current_pos[1]
-    q_value[i][j] = q_value[i][j] + alpha*(reward+gamma*(q_value[x][y])-q_value[x][y])
+    q_value[i][j] = q_value[i][j] + alpha * (reward + gamma * (q_value[x][y]) - q_value[x][y])
     print("sarsa q", q_value[i][j])
     return q_value
 
@@ -75,16 +76,15 @@ def cliff_walking(e, method):
     return 0
 
 
+def q_value_without_epsilon(q_values, reward, current_position):
+    max_q_value = max((q_values[current_position[0] + 1, current_position[1]]),
+                      (q_values[current_position[0] - 1, current_position[1]]),
+                      (q_values[current_position[0], current_position[1] + 1]),
+                      (q_values[current_position[0], current_position[1] - 1]))
+    q_values[current_position] = q_values[current_position] + alpha[
+        reward + (gamma * max_q_value) - q_values[current_position]]
 
 
-
-def q_value_without_epsilon(q_values,reward,current_position):
-    max_q_value=max((q_values[current_position[0]+1,current_position[1]]),
-                    (q_values[current_position[0]-1,current_position[1]]),
-                    (q_values[current_position[0],current_position[1]+1]),
-                    (q_values[current_position[0],current_position[1]-1]))
-    q_values[current_position] = q_values[current_position] + alpha[reward+ (gamma * max_q_value) - q_values[current_position]]
-
-q_value_without_epsilon((1,1))
+q_value_without_epsilon((1, 1))
 cliff_walking(0.5, "sarsa")
 cliff_walking(0.5, "Q-Learning")
