@@ -13,7 +13,7 @@ def epsilon_greedy_policy(e):
 
 
 num_episode = 2000
-plays = 1000
+plays = 10000
 
 
 def n_arm_bandit(e):
