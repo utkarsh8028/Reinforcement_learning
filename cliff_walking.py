@@ -46,17 +46,14 @@ def max_action():
     return 0
 
 
-def cliff_walking(e,method):
+def cliff_walking(e, method):
     total_reward = []
-    print("hi")
     env = Environment()
 
     for i in range(num_episode):
         current_position = env.start
         q_value = {}
-        print("hi2")
         for j in range(num_play):
-            print("hi3")
             policy = 1 if method == "Q-Learning" else sarsa_policy(e)
             action = random.choice(env.all_actions) if policy == 0 else max_action()
             print("reward", policy)
