@@ -87,34 +87,46 @@ def cliff_walking(e, method):
         print("episode: ", i)
         current_position = env.start
         count = 0
+        reward_per_epi = 0
         while current_position != env.finish:
             policy = 1 if method == "Q-Learning" else sarsa_policy(e)
             action = random_action(current_position) if policy == 0 else max_action(current_position, q_value)
             reward, next_position = env.environment_returns(action, current_position)
             print("reward", policy, reward, next_position)
+            q_value = update_sarsa_q_value(q_value, reward, current_position, next_position)
+            print(q_value)
+            reward_per_epi +=reward
             if reward == -100:
                 print("restarting")
                 break
-            q_value = update_sarsa_q_value(q_value, reward, current_position, next_position)
-            print(q_value)
             current_position = next_position
             count += 1
+        if (current_position == env.finish):
+            print("yuhuuuu")
+        total_reward.append(reward_per_epi)
 
     print("finished", method)
-    return 0
+    return total_reward
 
-
-def q_value_without_epsilon(q_values, reward, current_position):
-
-    max_q_value = max((q_values[current_position[0] + 1, current_position[1]]),
-                      (q_values[current_position[0] - 1, current_position[1]]),
-                      (q_values[current_position[0], current_position[1] + 1]),
-                      (q_values[current_position[0], current_position[1] - 1]))
-
-    q_values[current_position] = q_values[current_position] + alpha[
-        reward + (gamma * max_q_value) - q_values[current_position]]
+#
+# def q_value_without_epsilon(q_values, reward, current_position):
+#
+#     max_q_value = max((q_values[current_position[0] + 1, current_position[1]]),
+#                       (q_values[current_position[0] - 1, current_position[1]]),
+#                       (q_values[current_position[0], current_position[1] + 1]),
+#                       (q_values[current_position[0], current_position[1] - 1]))
+#
+#     q_values[current_position] = q_values[current_position] + alpha[
+#         reward + (gamma * max_q_value) - q_values[current_position]]
 
 
 # q_value_without_epsilon((1,1))
-cliff_walking(0.5, "sarsa")
-cliff_walking(0.5, "Q-Learning")
+rewards_sarsa = cliff_walking(0.5, "sarsa")
+rewards_q = cliff_walking(0.5, "Q-Learning")
+
+import matplotlib.pyplot as plt
+
+plt.plot(range(num_episode),rewards_sarsa, c='g', label='sara = 0')
+plt.plot(range(num_episode),rewards_q, c='r', label='eps = 0')
+
+plt.show()
