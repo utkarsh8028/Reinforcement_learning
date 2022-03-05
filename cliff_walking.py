@@ -12,12 +12,10 @@ class Environment:
     current_position = start
     all_actions = ["up", "down", "left", "right"]
 
-    def __init__(self, position):
-        self.current_position = position
-
-    def environment_returns(self, action):
+    def environment_returns(self, action, current_position):
+        self.current_position = current_position
         reward = -100 if self.current_position[0] == 0 and self.current_position[1] in range(1, 12) else -1
-        print('grid', self.grid)
+        # print('grid', self.grid)
         state = self.action_taken(action)
         return reward, state
 
@@ -36,11 +34,6 @@ class Environment:
         return position
 
 
-env = Environment((6, 0))
-rewards, states = env.environment_returns("down")
-print(rewards, states)
-
-
 def sarsa_policy(e):
     return 0 if abs(np.random.randn()) <= e else 1
 
@@ -50,22 +43,22 @@ num_play = 10
 
 
 def max_action():
-    return 0
+    return "up"
 
 
-def cliff_walking(e,method):
+def cliff_walking(e, method):
     total_reward = []
-    print("hi")
-    env = Environment((6, 0))
+    env = Environment()
+    print(env.grid)
     for i in range(num_episode):
-
-        Qvalue = {}
-        print("hi2")
+        current_position = env.start
+        q_value = {}
         for j in range(num_play):
-            print("hi3")
             policy = 1 if method == "Q-Learning" else sarsa_policy(e)
             action = random.choice(env.all_actions) if policy == 0 else max_action()
-            print("reward", policy)
+            reward, position = env.environment_returns(action, current_position)
+            print("reward", policy, reward, position)
+            current_position = position
     return 0
 
 
