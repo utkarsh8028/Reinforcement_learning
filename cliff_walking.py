@@ -1,4 +1,5 @@
-import gym
+import random
+
 import numpy as np
 
 
@@ -9,38 +10,33 @@ class Environment:
     start = (0, 0)
     finish = (0, 12)
     current_position = start
-    all_actions = {"up": (current_position[0] - 1, current_position[1]),
-                   "down": (current_position[0] + 1, current_position[1]),
-                   "left": (current_position[0], current_position[1] - 1),
-                   "right": (current_position[0], current_position[1] + 1)}
+    all_actions = ["up", "down", "left", "right"]
 
     def __init__(self, position):
         self.current_position = position
 
     def environment_returns(self, action):
-
-        reward = -100 if self.current_position[0] == 0 and self.current_position[1] in range(1, 11) else -1
-
+        reward = -100 if self.current_position[0] == 0 and self.current_position[1] in range(1, 12) else -1
         print('grid', self.grid)
         state = self.action_taken(action)
         return reward, state
 
     def action_taken(self, action):
-        if action == "up":
+        if action == self.all_actions[0]:
             position = self.current_position[0] - 1, self.current_position[1]
-        elif action == "down":
+        elif action == self.all_actions[1]:
             position = self.current_position[0] + 1, self.current_position[1]
-        elif action == "left":
+        elif action == self.all_actions[2]:
             position = self.current_position[0], self.current_position[1] - 1
-        elif action == "right":
+        elif action == self.all_actions[3]:
             position = self.current_position[0], self.current_position[1] + 1
         else:
-            position = self.current_position[0], self.current_position[1]
+            position = self.current_position
 
         return position
 
 
-env = Environment((6,0))
+env = Environment((6, 0))
 rewards, states = env.environment_returns("down")
 print(rewards, states)
 
@@ -53,19 +49,25 @@ num_episode = 5
 num_play = 10
 
 
-def cliff_walking_sarsa(e):
+def max_action():
+    return 0
+
+
+def cliff_walking(e,method):
     total_reward = []
     print("hi")
+    env = Environment((6, 0))
     for i in range(num_episode):
-        env.reset()
-        Q = {}
+
+        Qvalue = {}
         print("hi2")
         for j in range(num_play):
             print("hi3")
-            policy = sarsa_policy(e)
-            reward = env.step(policy)
-            print("range", env.reward_range)
-            print("reward", reward)
+            policy = 1 if method == "Q-Learning" else sarsa_policy(e)
+            action = random.choice(env.all_actions) if policy == 0 else max_action()
+            print("reward", policy)
     return 0
 
-# cliff_walking_sarsa(0.01)
+
+cliff_walking(0.5, "sarsa")
+cliff_walking(0.5, "Q-Learning")
