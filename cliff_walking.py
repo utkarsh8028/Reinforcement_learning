@@ -45,8 +45,6 @@ def sarsa_policy(e):
 
 def max_action(position, q_values):
     next_positions = filter_positions(position)
-    if len(next_positions) == 0:
-        print('s')
 
     v = ("", -20000)
 
@@ -62,8 +60,8 @@ def max_action(position, q_values):
 
 def update_sarsa_q_value(q_value, reward, current_position, c_action, next_position, n_action):
     q_value[current_position][c_action] += (
-                alpha * (reward + (gamma * q_value[next_position][n_action]) - q_value[current_position][c_action]))
-    #print("q", q_value[current_position][c_action])
+            alpha * (reward + (gamma * q_value[next_position][n_action]) - q_value[current_position][c_action]))
+    # print("q", q_value[current_position][c_action])
     return q_value
 
 
@@ -99,91 +97,90 @@ def init_qValues():
 
 
 def cliff_walking_sarsa(method, e=0.0):
-    total_reward = []
-    env = Environment()
-    print(env.grid)
-    q_value = init_qValues()
-    path =[]
-    for i in range(num_episode):
-        #print("episode: ", i)
-        current_position = env.start
-        path = [current_position]
-        count = 0
-        reward_per_epi = 0
-        c_action = random_action(current_position) if abs(np.random.randn()) < e else max_action(current_position,
-                                                                                                 q_value)
-        while current_position != env.finish:
 
-            reward, next_state = env.environment_returns(c_action, current_position)
+    final_rewards = []
+    path = []
+    np.random.seed(0)
+    for j in range(num_play):
+        total_reward = []
+        env = Environment()
+        q_value = init_qValues()
+        path = []
+        count =0
+        for i in range(num_episode):
+            current_position = env.start
+            path = [current_position]
+            count = 0
+            reward_per_epi = 0
+            c_action = random_action(current_position) if abs(np.random.randn()) < e else max_action(current_position,
+                                                                                                     q_value)
+            while current_position != env.finish:
 
-            policy = 1 if method == "Q-Learning" else sarsa_policy(e)
-            n_action = random_action(next_state) if policy == 0 else max_action(next_state, q_value)
-            q_value = update_sarsa_q_value(q_value, reward, current_position, c_action, next_state, n_action)
-            #print("q matrix \n", q_value)
-            reward_per_epi += reward
-            if reward == -100:
-                #print("restarting")
-                break
-            current_position = next_state
-            path.append(current_position)
-            c_action = n_action
-            count += 1
-        if current_position == env.finish:
-            pass
-        total_reward.append(reward_per_epi)
+                reward, next_state = env.environment_returns(c_action, current_position)
+                n_action = random_action(next_state) if sarsa_policy(e) == 0 else max_action(next_state, q_value)
+                q_value = update_sarsa_q_value(q_value, reward, current_position, c_action, next_state, n_action)
+                # print("q matrix \n", q_value)
+                reward_per_epi += reward
+                if reward == -100:
+                    # print("restarting")
+                    break
+                current_position = next_state
+                path.append(current_position)
+                c_action = n_action
+            if current_position == env.finish:
+                count += 1
+            total_reward.append(reward_per_epi)
+        final_rewards.append(total_reward)
 
-    print("finished", method,path)
-    return total_reward
-
-
+        print("count of goal reached", count)
+    print("finished", method, path)
+    return final_rewards
 
 
 def cliff_walking_q_learning(method, e=0.0):
-    total_reward = []
-    env = Environment()
-    print(env.grid)
-    q_value = init_qValues()
-    path = []
-    for i in range(num_episode):
-        #print("episode: ", i)
-        current_position = env.start
-        path = [current_position]
+    final_rewards = []
+    np.random.seed(0)
+    for j in range(num_play):
+        total_reward = []
+        env = Environment()
+        q_value = init_qValues()
+        path = []
         count = 0
-        reward_per_epi = 0
-        c_action = random_action(current_position) if abs(np.random.randn()) < e else max_action(current_position,
-                                                                                                 q_value)
-        while current_position != env.finish:
-            c_action = random_action(current_position) if abs(np.random.randn()) < e else max_action(current_position,q_value)
-            reward, next_state = env.environment_returns(c_action, current_position)
+        for i in range(num_episode):
+            # print("episode: ", i)
+            current_position = env.start
+            path = [current_position]
+            reward_per_epi = 0
+            while current_position != env.finish:
+                c_action = random_action(current_position) if abs(np.random.randn()) < e else max_action(current_position,
+                                                                                                        q_value)
+                reward, next_state = env.environment_returns(c_action, current_position)
+                n_action = max_action(next_state, q_value)
+                q_value = update_sarsa_q_value(q_value, reward, current_position, c_action, next_state, n_action)
+                reward_per_epi += reward
+                if reward == -100:
+                    break
+                current_position = next_state
+                path.append(current_position)
+            if current_position == env.finish:
+                count += 1
+            total_reward.append(reward_per_epi)
+        final_rewards.append(total_reward)
+        print("count of goal reached", count)
+        print("finished", method, path)
+    return final_rewards
 
-            policy = 1 if method == "Q-Learning" else sarsa_policy(e)
-            n_action =  max_action(next_state, q_value)
-            q_value = update_sarsa_q_value(q_value, reward, current_position, c_action, next_state, n_action)
-            #print("q matrix \n", q_value)
-            reward_per_epi += reward
-            if reward == -100:
-                #print("restarting")
-                break
-            current_position = next_state
-            path.append(current_position)
-            count += 1
-        if current_position == env.finish:
-            pass
-        total_reward.append(reward_per_epi)
-
-    print("finished", method, path)
-    return total_reward
 
 rewards_sarsa = cliff_walking_sarsa("sarsa", 0.1)
 
-rewards_q = cliff_walking_q_learning("Q-Learning",0)
+rewards_q = cliff_walking_q_learning("Q-Learning", 0.1)
 
 import matplotlib.pyplot as plt
 
 
 def moving_average(x, w):
-
-     return np.convolve(x, np.ones(w), 'same') / w
+    arr = np.array(x).mean(axis=0)
+    return np.convolve(arr, np.ones(w), 'same') / w
 
 
 plt.plot(range(num_episode), moving_average(rewards_sarsa, 10), c='g', label='sarsa')
