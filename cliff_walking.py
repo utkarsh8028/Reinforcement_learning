@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 
-num_episode = 500
+num_episode = 1000
 num_play = 10
 alpha = 0.1
 gamma = 1
@@ -53,8 +53,8 @@ def max_action(position, q_values):
     v = ("", -20000)
 
     for n in next_positions:
-        if(v[1]< q_values[position][n[0]]):
-            v = (n[0],q_values[position][n[0]])
+        if v[1] < q_values[position][n[0]]:
+            v = (n[0], q_values[position][n[0]])
 
 
     #action = max(next_positions, key=lambda item: q_values[position][item[0]])
@@ -104,7 +104,7 @@ def init_qValues():
 
 
 
-def cliff_walking(method, e=0.0):
+def cliff_walking_sarsa(method, e=0.0):
     total_reward = []
     env = Environment()
     print(env.grid)
@@ -138,13 +138,52 @@ def cliff_walking(method, e=0.0):
     return total_reward
 
 
-rewards_sarsa = cliff_walking("sarsa", 0.1)
-rewards_q = cliff_walking("Q-Learning")
+rewards_sarsa = cliff_walking_sarsa("sarsa", 0.1)
+
+
+def cliff_walking_q_learning(method, e=0.0):
+    total_reward = []
+    env = Environment()
+    print(env.grid)
+    q_value = init_qValues()
+    for i in range(num_episode):
+        print("episode: ", i)
+        current_position = env.start
+        count = 0
+        reward_per_epi = 0
+        c_action = random_action(current_position) if abs(np.random.randn()) < e else max_action(current_position,q_value)
+        while current_position != env.finish:
+            c_action = random_action(current_position) if abs(np.random.randn()) < e else max_action(current_position,
+                                                                                                     q_value)
+            reward, next_state = env.environment_returns(c_action, current_position)
+
+            policy = 1 if method == "Q-Learning" else sarsa_policy(e)
+            n_action = random_action(next_state) if policy == 0 else max_action(next_state, q_value)
+            q_value = update_sarsa_q_value(q_value, reward, current_position, c_action, next_state, n_action)
+            print("q matrix \n", q_value)
+            reward_per_epi += reward
+            if reward == -100:
+                print("restarting")
+                break
+            current_position = next_state
+            count += 1
+        if current_position == env.finish:
+            print("yuhuuuu")
+        total_reward.append(reward_per_epi)
+
+    print("finished", method)
+    return total_reward
+
+
+rewards_q = cliff_walking_q_learning("Q-Learning")
 
 import matplotlib.pyplot as plt
+def moving_average(x, w):
+    return np.convolve(x, np.ones(w), 'same') / w
 
-plt.plot(range(num_episode),rewards_sarsa, c='g', label='sarsa')
-plt.plot(range(num_episode),rewards_q, c='r', label='q-learning')
+
+plt.plot(range(num_episode),moving_average(rewards_sarsa,10), c='g', label='sarsa')
+plt.plot(range(num_episode),moving_average(rewards_q,10), c='r', label='q-learning')
 plt.legend()
 
 plt.show()
