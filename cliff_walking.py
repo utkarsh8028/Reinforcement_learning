@@ -176,7 +176,7 @@ def cliff_walking_q_learning(method, e=0.0):
 
 rewards_sarsa = cliff_walking_sarsa("sarsa", 0.1)
 
-rewards_q = cliff_walking_q_learning("Q-Learning",0.1)
+rewards_q = cliff_walking_q_learning("Q-Learning",0)
 
 import matplotlib.pyplot as plt
 
