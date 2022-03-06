@@ -1,7 +1,6 @@
 import random
-
 import numpy as np
-
+import matplotlib.pyplot as plt
 num_episode = 500
 num_play = 10
 alpha = 0.1
@@ -178,7 +177,7 @@ rewards_q, q_path = cliff_walking_q_learning("Q-Learning", 0.1)
 print("sarsa path ", sarsa_path)
 print("q path ", q_path)
 
-import matplotlib.pyplot as plt
+
 
 
 def moving_average(x, w):
