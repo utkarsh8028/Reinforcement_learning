@@ -1,4 +1,5 @@
 import random
+
 import numpy as np
 import matplotlib.pyplot as plt
 num_episode = 500
@@ -73,7 +74,7 @@ def random_action(position):
     return random.choice(next_positions)[0]
 
 
-def update_sarsa_q_value(q_value, reward, current_position, c_action, next_position, n_action):
+def update_q_value(q_value, reward, current_position, c_action, next_position, n_action):
     q_value[current_position][c_action] += (
             alpha * (reward + (gamma * q_value[next_position][n_action]) - q_value[current_position][c_action]))
     # print("q", q_value[current_position][c_action])
@@ -92,7 +93,7 @@ def init_q_values():
     return q_dict
 
 
-def cliff_walking_sarsa(method, e=0.0):
+def cliff_walking_sarsa(e=0.1):
     final_rewards = []
     path = []
     np.random.seed(0)
@@ -113,7 +114,7 @@ def cliff_walking_sarsa(method, e=0.0):
 
                 reward, next_state = env.environment_returns(c_action, current_position)
                 n_action = random_action(next_state) if sarsa_policy(e) == 0 else max_action(next_state, q_value)
-                q_value = update_sarsa_q_value(q_value, reward, current_position, c_action, next_state, n_action)
+                q_value = update_q_value(q_value, reward, current_position, c_action, next_state, n_action)
                 reward_per_epi += reward
                 if reward == -100:
                     current_position = env.start
@@ -135,7 +136,7 @@ def cliff_walking_sarsa(method, e=0.0):
     return final_rewards, path
 
 
-def cliff_walking_q_learning(method, e=0.0):
+def cliff_walking_q_learning(e=0.0):
     final_rewards = []
     path = []
     np.random.seed(0)
@@ -155,7 +156,7 @@ def cliff_walking_q_learning(method, e=0.0):
                     q_value)
                 reward, next_state = env.environment_returns(c_action, current_position)
                 n_action = max_action(next_state, q_value)
-                q_value = update_sarsa_q_value(q_value, reward, current_position, c_action, next_state, n_action)
+                q_value = update_q_value(q_value, reward, current_position, c_action, next_state, n_action)
                 reward_per_epi += reward
                 if reward == -100:
                     current_position = env.start
@@ -170,24 +171,54 @@ def cliff_walking_q_learning(method, e=0.0):
     return final_rewards, path
 
 
-rewards_sarsa, sarsa_path = cliff_walking_sarsa("sarsa", 0.1)
-
-rewards_q, q_path = cliff_walking_q_learning("Q-Learning", 0.1)
-
-print("sarsa path ", sarsa_path)
-print("q path ", q_path)
-
-
-
 
 def moving_average(x, w):
     arr = np.array(x).mean(axis=0)
     return np.convolve(arr, np.ones(w), 'same') / w
 
 
+rewards_sarsa, sarsa_path = cliff_walking_sarsa(0.1)
+
+rewards_q, q_path = cliff_walking_q_learning(0.1)
+
+print("sarsa path with e 0.1 ", sarsa_path)
+print("q path with e 0.1", q_path)
+
+
 plt.plot(range(num_episode), moving_average(rewards_sarsa, 10), c='g', label='sarsa')
 plt.plot(range(num_episode), moving_average(rewards_q, 10), c='r', label='q-learning')
 plt.ylim(-100, 0)
 plt.legend()
+plt.xlabel('Epsilon 0.1')
 
+plt.show()
+
+rewards_sarsa, sarsa_path = cliff_walking_sarsa( 0.01)
+
+rewards_q, q_path = cliff_walking_q_learning( 0.01)
+
+print("sarsa path with e 0.01", sarsa_path)
+print("q path with e 0.01", q_path)
+
+
+plt.plot(range(num_episode), moving_average(rewards_sarsa, 10), c='g', label='sarsa ')
+plt.plot(range(num_episode), moving_average(rewards_q, 10), c='r', label='q-learning ')
+plt.ylim(-100, 0)
+plt.legend()
+plt.xlabel('Epsilon 0.01')
+plt.show()
+
+rewards_sarsa, sarsa_path = cliff_walking_sarsa(0)
+
+rewards_q, q_path = cliff_walking_q_learning(0)
+
+print("sarsa path with e 0", sarsa_path)
+print("q path with e 0", q_path)
+
+
+plt.plot(range(num_episode), moving_average(rewards_sarsa, 10), c='g', label='sarsa')
+plt.plot(range(num_episode), moving_average(rewards_q, 10), c='r', label='q-learning')
+plt.ylim(-100, 0)
+plt.legend()
+plt.xlabel('Epsilon 0')
 plt.show()
