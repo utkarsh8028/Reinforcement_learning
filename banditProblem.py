@@ -1,40 +1,64 @@
-import gym
-import pandas as pd
+import random
 
-env = gym.make('MultiarmedBandits-v0')
-
-print("action Space: ", env.action_space)
-print("ob Space: ", env.observation_space)
-Value = {}
-
-def epsilon_greedy_policy():
-    return  max(Value, key= lambda x: Value[x])
+import numpy as np
+import matplotlib.pyplot as plt
 
 
-for a in range(env.action_space.n):
-    Value[a] = 0.0
+def step(action_values, arm):
+    return np.random.normal(action_values[arm], 1, (1, 1))[0]
 
 
-alpha = 0.85
-gamma = 0.90
+def epsilon_greedy_policy(action_values, e):
+    return np.random.choice(10) if np.random.randn(1) < e else np.argmax(action_values)
+
+
+def policy_finder( ep_value, rand_limit, action_values):
+    if rand_limit <= ep_value:
+        m_action = [int(random.uniform(0, len(action_values))), int(np.argmax(action_values))]
+        res = int(random.uniform(0, 1))
+        if res == 0:
+            rand_limit += 1
+        policy = m_action[res]
+    else:
+        print("max")
+        policy = int(np.argmax(action_values))
+    return policy
+
+
 num_episode = 1000
-num_time_steps = 100
-s = 0
 
-for i in range(num_episode):
 
-    env.reset()
-    # print(reset)
-    for t in range(num_time_steps):
-        env.render()
-        action = epsilon_greedy_policy()
-        s1, reward, done, _ = env.step(action)
-        Value[action] += alpha * (reward - Value[action])
-        print("action: ", action, "reward: ", reward)
-        if done:
-            print("Episode finished after {} timesteps".format(t + 1))
-            print("Done: ", done, reward)
-            break
-df = pd.DataFrame(list(Value.items()),columns=['state' , 'value'])
-print(df)
-env.close()
+def n_arm_bandit(e):
+    avg_rewards = []
+
+    g_rewards = 0
+    rand_limit = 0
+    num_plays = 2000
+    for i in range(1, num_episode + 1):
+        action_values = np.random.normal(0, 1, (10, 1))
+        q_value = np.zeros((10,1))
+        total_rewards = 0
+        for j in range(0, num_plays):
+            action = policy_finder(e*num_plays, rand_limit, action_values)
+            reward = step(action_values, action)
+            q_value[action] += (1 / i) * (reward - q_value[action])
+            total_rewards += reward
+        g_rewards += total_rewards
+        avg_rewards.append(total_rewards)
+        # print("action: ", action, "reward: ", reward)
+
+    print(g_rewards)
+    return g_rewards, avg_rewards
+
+
+reward_1, avg_reward_1 = n_arm_bandit(0)
+
+reward_2, avg_reward_2 = n_arm_bandit(0.01)
+
+reward_3, avg_reward_3 = n_arm_bandit(0.1)
+
+plt.plot(range(0, num_episode), avg_reward_1, c='r')
+plt.plot(range(0, num_episode), avg_reward_2, c='g')
+plt.plot(range(0, num_episode), avg_reward_3, c='b')
+
+plt.show()
