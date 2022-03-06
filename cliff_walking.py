@@ -43,19 +43,44 @@ def sarsa_policy(e):
     return 0 if abs(np.random.randn()) <= e else 1
 
 
+def filter_positions(position):
+    next_positions = [("up", position[0] - 1, position[1]), ("down", position[0] + 1, position[1]),
+                      ("left", position[0], position[1] - 1), ("right", position[0], position[1] + 1)]
+    next_positions = list(filter(lambda x: (-1 < x[1] < 4 and -1 < x[2] < 12), next_positions))
+    pos = []
+    for p in next_positions:
+        if p[1] == 4:
+            print('2')
+        if p[1] == 3 and p[2] == 0:
+            pass
+        else:
+            pos.append(p)
+
+    return pos
+
+
 def max_action(position, q_values):
     next_positions = filter_positions(position)
 
-    v = ("", -20000)
+    if len(next_positions) == 0:
+        print('2')
 
-    for n in next_positions:
-        if v[1] < q_values[position][n[0]]:
-            v = (n[0], q_values[position][n[0]])
+    # v = ("", -20000)
+    #
+    # for n in next_positions:
+    #     if v[1] < q_values[position][n[0]]:
+    #         v = (n[0], q_values[position][n[0]])
+    # action = v
 
-    # action = max(next_positions, key=lambda item: q_values[position][item[0]])
-    action = v
-    #print("ac", action)
+    action = max(next_positions, key=lambda item: q_values[position][item[0]])
+    # print("ac", action)
     return action[0]
+
+
+def random_action(position):
+    next_positions = filter_positions(position)
+
+    return random.choice(next_positions)[0]
 
 
 def update_sarsa_q_value(q_value, reward, current_position, c_action, next_position, n_action):
@@ -65,26 +90,7 @@ def update_sarsa_q_value(q_value, reward, current_position, c_action, next_posit
     return q_value
 
 
-def filter_positions(position):
-    next_positions = [("up", position[0] - 1, position[1]), ("down", position[0] + 1, position[1]),
-                      ("left", position[0], position[1] - 1), ("right", position[0], position[1] + 1)]
-    next_positions = list(filter(lambda x: (-1 < x[1] < 4 and -1 < x[2] < 12), next_positions))
-    pos = []
-    for p in next_positions:
-        if p[1] == 3 and p[2] == 0:
-            pass
-        else:
-            pos.append(p)
-    return pos
-
-
-def random_action(position):
-    next_positions = filter_positions(position)
-
-    return random.choice(next_positions)[0]
-
-
-def init_qValues():
+def init_q_values():
     q_dict = {}
     for i in range(4):
         for j in range(12):
@@ -97,33 +103,34 @@ def init_qValues():
 
 
 def cliff_walking_sarsa(method, e=0.0):
-
     final_rewards = []
     path = []
     np.random.seed(0)
     for j in range(num_play):
         total_reward = []
         env = Environment()
-        q_value = init_qValues()
+        q_value = init_q_values()
         path = []
-        count =0
+        count = 0
         for i in range(num_episode):
             current_position = env.start
             path = [current_position]
             count = 0
             reward_per_epi = 0
-            c_action = random_action(current_position) if abs(np.random.randn()) < e else max_action(current_position,
+            c_action = random_action(current_position) if abs(np.random.randn()) <=e else max_action(current_position,
                                                                                                      q_value)
             while current_position != env.finish:
 
                 reward, next_state = env.environment_returns(c_action, current_position)
                 n_action = random_action(next_state) if sarsa_policy(e) == 0 else max_action(next_state, q_value)
                 q_value = update_sarsa_q_value(q_value, reward, current_position, c_action, next_state, n_action)
-                # print("q matrix \n", q_value)
                 reward_per_epi += reward
                 if reward == -100:
-                    # print("restarting")
-                    break
+                    current_position = env.start
+                    c_action = random_action(current_position) if abs(np.random.randn()) <= e else max_action(
+                        current_position,
+                        q_value)
+                    continue
                 current_position = next_state
                 path.append(current_position)
                 c_action = n_action
@@ -143,7 +150,7 @@ def cliff_walking_q_learning(method, e=0.0):
     for j in range(num_play):
         total_reward = []
         env = Environment()
-        q_value = init_qValues()
+        q_value = init_q_values()
         path = []
         count = 0
         for i in range(num_episode):
@@ -152,14 +159,16 @@ def cliff_walking_q_learning(method, e=0.0):
             path = [current_position]
             reward_per_epi = 0
             while current_position != env.finish:
-                c_action = random_action(current_position) if abs(np.random.randn()) < e else max_action(current_position,
-                                                                                                        q_value)
+                c_action = random_action(current_position) if abs(np.random.randn()) < e else max_action(
+                    current_position,
+                    q_value)
                 reward, next_state = env.environment_returns(c_action, current_position)
                 n_action = max_action(next_state, q_value)
                 q_value = update_sarsa_q_value(q_value, reward, current_position, c_action, next_state, n_action)
                 reward_per_epi += reward
                 if reward == -100:
-                    break
+                    current_position = env.start
+                    continue
                 current_position = next_state
                 path.append(current_position)
             if current_position == env.finish:
@@ -185,6 +194,7 @@ def moving_average(x, w):
 
 plt.plot(range(num_episode), moving_average(rewards_sarsa, 10), c='g', label='sarsa')
 plt.plot(range(num_episode), moving_average(rewards_q, 10), c='r', label='q-learning')
+plt.ylim(-100,0)
 plt.legend()
 
 plt.show()
