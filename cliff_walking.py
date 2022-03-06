@@ -20,9 +20,9 @@ class Environment:
 
     def environment_returns(self, action, current_position):
         self.current_position = current_position
-        reward = -100 if self.current_position[0] == 3 and self.current_position[1] in range(1, 11) else -1
         # print('grid', self.grid)
         state = self.action_taken(action)
+        reward = -100 if state[0] == 3 and state[1] in range(1, 11) else -1
         return reward, state
 
     def action_taken(self, action):
@@ -78,7 +78,7 @@ def random_action(position):
     return random.choice(next_positions)[0]
 
 
-def cliff_walking(method,e=0.0):
+def cliff_walking(method, e=0.0):
     total_reward = []
     env = Environment()
     print(env.grid)
@@ -121,7 +121,7 @@ def cliff_walking(method,e=0.0):
 
 
 # q_value_without_epsilon((1,1))
-rewards_sarsa = cliff_walking("sarsa",0.3)
+rewards_sarsa = cliff_walking("sarsa", 0.2)
 rewards_q = cliff_walking("Q-Learning")
 
 import matplotlib.pyplot as plt
