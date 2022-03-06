@@ -68,7 +68,14 @@ def update_sarsa_q_value(q_value, reward, current_pos, next_pos):
 def filter_positions(position):
     next_positions = [("up", position[0] - 1, position[1]), ("down", position[0] + 1, position[1]),
                       ("left", position[0], position[1] - 1), ("right", position[0], position[1] + 1)]
-    return list(filter(lambda x: -1 < x[1] < 4 and -1 < x[2] < 12 and (x[1] != 0 and x[2] != 0), next_positions))
+    next_positions = list(filter(lambda x: (-1 < x[1] < 4 and -1 < x[2] < 12), next_positions))
+    pos =[]
+    for p in next_positions:
+        if p[1]==0 and p[2] ==0:
+           pass
+        else:
+            pos.append(p)
+    return pos
 
 
 def random_action(position):
@@ -98,7 +105,7 @@ def cliff_walking(method, e=0.0):
             reward_per_epi += reward
             if reward == -100:
                 print("restarting")
-            #    break
+                break
             current_position = next_position
             count += 1
         if current_position == env.finish:
