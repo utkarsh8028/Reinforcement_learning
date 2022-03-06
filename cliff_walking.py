@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 
-num_episode = 500
+num_episode = 5
 num_play = 10
 alpha = 0.1
 gamma = 1
@@ -52,7 +52,7 @@ def max_action(position, q_values):
     action = max(next_positions, key=lambda item: q_values[item[1], item[2]])
     # action = max(next_positions, key=lambda k: next_positions[k])
     print("ac", action)
-    return action
+    return action[0]
 
 
 def update_sarsa_q_value(q_value, reward, current_pos, next_pos):
@@ -75,7 +75,7 @@ def random_action(position):
 
     next_positions = filter_positions(position)
 
-    return random.choice(next_positions)
+    return random.choice(next_positions)[0]
 
 
 def cliff_walking(e, method):
@@ -90,11 +90,10 @@ def cliff_walking(e, method):
         reward_per_epi = 0
         while current_position != env.finish:
             policy = 1 if method == "Q-Learning" else sarsa_policy(e)
-            action = random_action(current_position)[0] if policy == 0 else max_action(current_position, q_value)[0]
+            action = random_action(current_position) if policy == 0 else max_action(current_position, q_value)
             reward, next_position = env.environment_returns(action, current_position)
             print("reward", policy, reward, next_position)
-            if method == "sarsa":
-                q_value = update_sarsa_q_value(q_value, reward, current_position, next_position)
+            q_value = update_sarsa_q_value(q_value, reward, current_position, next_position)
             print("q matrix \n", q_value)
             reward_per_epi += reward
             if reward == -100:
