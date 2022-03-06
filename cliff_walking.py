@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 
-num_episode = 5000
+num_episode = 500
 num_play = 10
 alpha = 0.1
 gamma = 1
@@ -49,8 +49,16 @@ def max_action(position, q_values):
     next_positions = filter_positions(position)
     if len(next_positions) == 0:
         print('s')
-    action = max(next_positions, key=lambda item: q_values[position][item[0]])
-    # action = max(next_positions, key=lambda k: next_positions[k])
+
+    v = ("", -20000)
+
+    for n in next_positions:
+        if(v[1]< q_values[position][n[0]]):
+            v = (n[0],q_values[position][n[0]])
+
+
+    #action = max(next_positions, key=lambda item: q_values[position][item[0]])
+    action = v
     print("ac", action)
     return action[0]
 
@@ -106,7 +114,7 @@ def cliff_walking(method, e=0.0):
         current_position = env.start
         count = 0
         reward_per_epi = 0
-        c_action = random_action(current_position) if abs(np.random.randn()) < 0.1 else max_action(current_position, q_value)
+        c_action = random_action(current_position) if abs(np.random.randn()) < e else max_action(current_position, q_value)
         while current_position != env.finish:
 
             reward, next_state = env.environment_returns(c_action, current_position)
