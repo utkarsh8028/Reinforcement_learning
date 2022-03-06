@@ -61,7 +61,7 @@ def update_sarsa_q_value(q_value, reward, current_pos, next_pos):
     x = current_pos[0]
     y = current_pos[1]
     q_value[x][y] = q_value[x][y] + alpha * (reward + (gamma * (q_value[i][j])) - q_value[x][y])
-    print("q", q_value[x][y])
+    print("q_value line 64", q_value[x][y])
     return q_value
 
 
@@ -92,9 +92,9 @@ def cliff_walking(method, e=0.0):
             policy = 1 if method == "Q-Learning" else sarsa_policy(e)
             action = random_action(current_position) if policy == 0 else max_action(current_position, q_value)
             reward, next_position = env.environment_returns(action, current_position)
-            print("reward", policy, reward, next_position)
+            print("policy,reward,next position", policy, reward, next_position)
             q_value = update_sarsa_q_value(q_value, reward, current_position, next_position)
-            print("q matrix \n", q_value)
+            print("q_value matrix \n", q_value)
             reward_per_epi += reward
             if reward == -100:
                 print("restarting")
@@ -108,20 +108,8 @@ def cliff_walking(method, e=0.0):
     print("finished", method)
     return total_reward
 
-#
-# def q_value_without_epsilon(q_values, reward, current_position):
-#
-#     max_q_value = max((q_values[current_position[0] + 1, current_position[1]]),
-#                       (q_values[current_position[0] - 1, current_position[1]]),
-#                       (q_values[current_position[0], current_position[1] + 1]),
-#                       (q_values[current_position[0], current_position[1] - 1]))
-#
-#     q_values[current_position] = q_values[current_position] + alpha[
-#         reward + (gamma * max_q_value) - q_values[current_position]]
 
-
-# q_value_without_epsilon((1,1))
-rewards_sarsa = cliff_walking("sarsa", 0.2)
+rewards_sarsa = cliff_walking("sarsa", 0.1)
 rewards_q = cliff_walking("Q-Learning")
 
 import matplotlib.pyplot as plt
