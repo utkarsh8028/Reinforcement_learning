@@ -49,19 +49,16 @@ def max_action(position, q_values):
     next_positions = filter_positions(position)
     if len(next_positions) == 0:
         print('s')
-    action = max(next_positions, key=lambda item: q_values[item[1], item[2]])
+    action = max(next_positions, key=lambda item: q_values[position][item[0]])
     # action = max(next_positions, key=lambda k: next_positions[k])
     print("ac", action)
     return action[0]
 
 
-def update_sarsa_q_value(q_value, reward, current_pos, next_pos):
-    i = next_pos[0]
-    j = next_pos[1]
-    x = current_pos[0]
-    y = current_pos[1]
-    q_value[x][y] += (alpha * (reward + (gamma * q_value[i][j]) - q_value[x][y]))
-    print("q", q_value[x][y])
+def update_sarsa_q_value(q_value, reward, current_position,c_action, next_position, n_action):
+
+    q_value[current_position][c_action] += (alpha * (reward + (gamma * q_value[next_position][n_action]) - q_value[current_position][c_action] ))
+    print("q", q_value[current_position][c_action] )
     return q_value
 
 
@@ -115,16 +112,15 @@ def cliff_walking(method, e=0.0):
             reward, next_state = env.environment_returns(c_action, current_position)
 
             policy = 1 if method == "Q-Learning" else sarsa_policy(e)
-            action = random_action(next_state) if policy == 0 else max_action(next_state, q_value)
-            reward, next_position = env.environment_returns(action, current_position)
-            print("policy,reward,next position", policy, reward, next_position)
-            q_value = update_sarsa_q_value(q_value, reward, current_position, next_position)
+            n_action = random_action(next_state) if policy == 0 else max_action(next_state, q_value)
+            q_value = update_sarsa_q_value(q_value, reward, current_position,c_action, next_state, n_action)
             print("q matrix \n", q_value)
             reward_per_epi += reward
             if reward == -100:
                 print("restarting")
                 break
-            current_position = next_position
+            current_position = next_state
+            c_action = n_action
             count += 1
         if current_position == env.finish:
             print("yuhuuuu")
