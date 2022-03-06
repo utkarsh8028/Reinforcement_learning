@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 
-num_episode = 500
+num_episode = 5000
 num_play = 10
 alpha = 0.1
 gamma = 1
@@ -60,7 +60,7 @@ def update_sarsa_q_value(q_value, reward, current_pos, next_pos):
     j = next_pos[1]
     x = current_pos[0]
     y = current_pos[1]
-    q_value[i][j] = q_value[i][j] + alpha * (reward + (gamma * (q_value[x][y])) - q_value[i][j])
+    q_value[x][y] += (alpha * (reward + (gamma * q_value[i][j]) - q_value[x][y]))
     print("q", q_value[x][y])
     return q_value
 
@@ -85,19 +85,37 @@ def random_action(position):
     return random.choice(next_positions)[0]
 
 
+def init_qValues():
+    q_dict = {}
+    for i in range(4):
+        for j in range(12):
+            q_dict[(i, j)] = {}
+            q_dict[(i, j)]["up"] =0
+            q_dict[(i, j)]["down"] =0
+            q_dict[(i, j)]["left"] =0
+            q_dict[(i, j)]["right"] =0
+    return q_dict
+
+
+
+
 def cliff_walking(method, e=0.0):
     total_reward = []
     env = Environment()
     print(env.grid)
-    q_value = np.zeros(env.grid.shape)
+    q_value = init_qValues()
     for i in range(num_episode):
         print("episode: ", i)
         current_position = env.start
         count = 0
         reward_per_epi = 0
+        c_action = random_action(current_position) if abs(np.random.randn()) < 0.1 else max_action(current_position, q_value)
         while current_position != env.finish:
+
+            reward, next_state = env.environment_returns(c_action, current_position)
+
             policy = 1 if method == "Q-Learning" else sarsa_policy(e)
-            action = random_action(current_position) if policy == 0 else max_action(current_position, q_value)
+            action = random_action(next_state) if policy == 0 else max_action(next_state, q_value)
             reward, next_position = env.environment_returns(action, current_position)
             print("policy,reward,next position", policy, reward, next_position)
             q_value = update_sarsa_q_value(q_value, reward, current_position, next_position)
@@ -121,7 +139,8 @@ rewards_q = cliff_walking("Q-Learning")
 
 import matplotlib.pyplot as plt
 
-plt.plot(range(num_episode),rewards_sarsa, c='g', label='sara = 0')
-plt.plot(range(num_episode),rewards_q, c='r', label='eps = 0')
+plt.plot(range(num_episode),rewards_sarsa, c='g', label='sarsa')
+plt.plot(range(num_episode),rewards_q, c='r', label='q-learning')
+plt.legend()
 
 plt.show()
