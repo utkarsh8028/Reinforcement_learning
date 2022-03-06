@@ -43,6 +43,7 @@ def sarsa_policy(e):
     return 0 if abs(np.random.randn()) <= e else 1
 
 
+# remove impossible next positions like -1,0 or 0,-1 etc
 def filter_positions(position):
     next_positions = [("up", position[0] - 1, position[1]), ("down", position[0] + 1, position[1]),
                       ("left", position[0], position[1] - 1), ("right", position[0], position[1] + 1)]
@@ -59,21 +60,11 @@ def filter_positions(position):
     return pos
 
 
+# get max action
 def max_action(position, q_values):
     next_positions = filter_positions(position)
 
-    if len(next_positions) == 0:
-        print('2')
-
-    # v = ("", -20000)
-    #
-    # for n in next_positions:
-    #     if v[1] < q_values[position][n[0]]:
-    #         v = (n[0], q_values[position][n[0]])
-    # action = v
-
     action = max(next_positions, key=lambda item: q_values[position][item[0]])
-    # print("ac", action)
     return action[0]
 
 
@@ -117,8 +108,8 @@ def cliff_walking_sarsa(method, e=0.0):
             path = [current_position]
             count = 0
             reward_per_epi = 0
-            c_action = random_action(current_position) if abs(np.random.randn()) <=e else max_action(current_position,
-                                                                                                     q_value)
+            c_action = random_action(current_position) if abs(np.random.randn()) <= e else max_action(current_position,
+                                                                                                      q_value)
             while current_position != env.finish:
 
                 reward, next_state = env.environment_returns(c_action, current_position)
@@ -136,12 +127,12 @@ def cliff_walking_sarsa(method, e=0.0):
                 c_action = n_action
             if current_position == env.finish:
                 count += 1
-            #print('reward per episode',reward_per_epi)
+            # print('reward per episode',reward_per_epi)
             total_reward.append(reward_per_epi)
         final_rewards.append(total_reward)
 
-        #print("count of goal reached", count)
-    #print("finished", method, path)
+        # print("count of goal reached", count)
+    # print("finished", method, path)
     return final_rewards, path
 
 
@@ -180,14 +171,12 @@ def cliff_walking_q_learning(method, e=0.0):
     return final_rewards, path
 
 
-
-
 rewards_sarsa, sarsa_path = cliff_walking_sarsa("sarsa", 0.1)
 
-rewards_q , q_path= cliff_walking_q_learning("Q-Learning", 0.1)
+rewards_q, q_path = cliff_walking_q_learning("Q-Learning", 0.1)
 
-print("sarsa path " , sarsa_path)
-print("q path " , q_path)
+print("sarsa path ", sarsa_path)
+print("q path ", q_path)
 
 import matplotlib.pyplot as plt
 
@@ -199,7 +188,7 @@ def moving_average(x, w):
 
 plt.plot(range(num_episode), moving_average(rewards_sarsa, 10), c='g', label='sarsa')
 plt.plot(range(num_episode), moving_average(rewards_q, 10), c='r', label='q-learning')
-plt.ylim(-100,0)
+plt.ylim(-100, 0)
 plt.legend()
 
 plt.show()
