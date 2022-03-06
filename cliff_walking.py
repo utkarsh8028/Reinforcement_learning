@@ -101,7 +101,7 @@ def cliff_walking(e, method):
                 break
             current_position = next_position
             count += 1
-        if (current_position == env.finish):
+        if current_position == env.finish:
             print("yuhuuuu")
         total_reward.append(reward_per_epi)
 
