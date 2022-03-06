@@ -78,7 +78,7 @@ def random_action(position):
     return random.choice(next_positions)[0]
 
 
-def cliff_walking(e, method):
+def cliff_walking(method,e=0.0):
     total_reward = []
     env = Environment()
     print(env.grid)
@@ -98,7 +98,7 @@ def cliff_walking(e, method):
             reward_per_epi += reward
             if reward == -100:
                 print("restarting")
-                break
+            #    break
             current_position = next_position
             count += 1
         if current_position == env.finish:
@@ -121,8 +121,8 @@ def cliff_walking(e, method):
 
 
 # q_value_without_epsilon((1,1))
-rewards_sarsa = cliff_walking(0.5, "sarsa")
-rewards_q = cliff_walking(0.5, "Q-Learning")
+rewards_sarsa = cliff_walking("sarsa",0.3)
+rewards_q = cliff_walking("Q-Learning")
 
 import matplotlib.pyplot as plt
 
