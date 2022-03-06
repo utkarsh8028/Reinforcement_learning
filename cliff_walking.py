@@ -136,22 +136,23 @@ def cliff_walking_sarsa(method, e=0.0):
                 c_action = n_action
             if current_position == env.finish:
                 count += 1
+            #print('reward per episode',reward_per_epi)
             total_reward.append(reward_per_epi)
         final_rewards.append(total_reward)
 
-        print("count of goal reached", count)
-    print("finished", method, path)
-    return final_rewards
+        #print("count of goal reached", count)
+    #print("finished", method, path)
+    return final_rewards, path
 
 
 def cliff_walking_q_learning(method, e=0.0):
     final_rewards = []
+    path = []
     np.random.seed(0)
     for j in range(num_play):
         total_reward = []
         env = Environment()
         q_value = init_q_values()
-        path = []
         count = 0
         for i in range(num_episode):
             # print("episode: ", i)
@@ -173,16 +174,20 @@ def cliff_walking_q_learning(method, e=0.0):
                 path.append(current_position)
             if current_position == env.finish:
                 count += 1
+            # print('reward per episode',reward_per_epi)
             total_reward.append(reward_per_epi)
         final_rewards.append(total_reward)
-        print("count of goal reached", count)
-        print("finished", method, path)
-    return final_rewards
+    return final_rewards, path
 
 
-rewards_sarsa = cliff_walking_sarsa("sarsa", 0.1)
 
-rewards_q = cliff_walking_q_learning("Q-Learning", 0.1)
+
+rewards_sarsa, sarsa_path = cliff_walking_sarsa("sarsa", 0.1)
+
+rewards_q , q_path= cliff_walking_q_learning("Q-Learning", 0.1)
+
+print("sarsa path " , sarsa_path)
+print("q path " , q_path)
 
 import matplotlib.pyplot as plt
 
