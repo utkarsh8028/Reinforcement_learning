@@ -50,8 +50,6 @@ def filter_positions(position):
     next_positions = list(filter(lambda x: (-1 < x[1] < 4 and -1 < x[2] < 12), next_positions))
     pos = []
     for p in next_positions:
-        if p[1] == 4:
-            print('2')
         if p[1] == 3 and p[2] == 0:
             pass
         else:
