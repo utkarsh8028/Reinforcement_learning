@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 
-num_episode = 5
+num_episode = 500
 num_play = 10
 alpha = 0.1
 gamma = 1
@@ -60,7 +60,7 @@ def update_sarsa_q_value(q_value, reward, current_pos, next_pos):
     j = next_pos[1]
     x = current_pos[0]
     y = current_pos[1]
-    q_value[x][y] = q_value[x][y] + alpha * (reward + (gamma * (q_value[i][j])) - q_value[x][y])
+    q_value[i][j] = q_value[i][j] + alpha * (reward + (gamma * (q_value[x][y])) - q_value[i][j])
     print("q", q_value[x][y])
     return q_value
 
@@ -92,13 +92,13 @@ def cliff_walking(method, e=0.0):
             policy = 1 if method == "Q-Learning" else sarsa_policy(e)
             action = random_action(current_position) if policy == 0 else max_action(current_position, q_value)
             reward, next_position = env.environment_returns(action, current_position)
-            print("reward", policy, reward, next_position)
+            print("reward", policy, reward, current_position, next_position)
             q_value = update_sarsa_q_value(q_value, reward, current_position, next_position)
             print("q matrix \n", q_value)
             reward_per_epi += reward
             if reward == -100:
                 print("restarting")
-            #    break
+                break
             current_position = next_position
             count += 1
         if current_position == env.finish:
@@ -121,7 +121,7 @@ def cliff_walking(method, e=0.0):
 
 
 # q_value_without_epsilon((1,1))
-rewards_sarsa = cliff_walking("sarsa", 0.2)
+rewards_sarsa = cliff_walking("sarsa", 0.01)
 rewards_q = cliff_walking("Q-Learning")
 
 import matplotlib.pyplot as plt
