@@ -95,11 +95,17 @@ rewards_2d, optimal_machine_choices = n_arm_bandit(0.01)
 reward_ep_2 = get_average_rewards(rewards_2d)
 optimal_choices_ep2 = get_percentage_optimal_list(optimal_machine_choices)
 
+rewards_2d, optimal_machine_choices = n_arm_bandit(0.8)
 
-def plot_subplot(subplot, x_range, y_data1, y_data2, y_data3, y_label):
+reward_ep_3 = get_average_rewards(rewards_2d)
+optimal_choices_ep3 = get_percentage_optimal_list(optimal_machine_choices)
+
+
+def plot_subplot(subplot, x_range, y_data1, y_data2, y_data3, y_data4, y_label):
     subplot.plot(range(0, x_range), y_data1, c='g', label='eps = 0')
     subplot.plot(range(0, x_range), y_data2, c='k', label='eps = 0.1')
     subplot.plot(range(0, x_range), y_data3, c='r', label='eps = 0.01')
+    subplot.plot(range(0, x_range), y_data4, c='b', label='eps = 0.8')
     subplot.set_ylabel(y_label)
     subplot.legend()
     return subplot
@@ -107,11 +113,11 @@ def plot_subplot(subplot, x_range, y_data1, y_data2, y_data3, y_label):
 
 fig, (ax1, ax2) = plt.subplots(2)
 
-ax1 = plot_subplot(ax1, plays, reward_ep0, reward_ep_1, reward_ep_2, 'Average rewards over 2000 runs')
+ax1 = plot_subplot(ax1, plays, reward_ep0, reward_ep_1, reward_ep_2, reward_ep_3, 'Average rewards over 2000 runs')
 
 ax2.yaxis.set_major_formatter(mtick.PercentFormatter(100))
 
-ax2 = plot_subplot(ax2, plays, optimal_choices_ep0, optimal_choices_ep1, optimal_choices_ep2, 'Optimal Action %')
+ax2 = plot_subplot(ax2, plays, optimal_choices_ep0, optimal_choices_ep1, optimal_choices_ep2,optimal_choices_ep3, 'Optimal Action %')
 
 ax2.set_xlabel('Steps')
 fig.show()
